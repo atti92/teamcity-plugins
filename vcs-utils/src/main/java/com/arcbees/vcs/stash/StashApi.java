@@ -143,7 +143,7 @@ public class StashApi extends AbstractVcsApi {
         request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
         LOGGER.log(Level.INFO, "updateStatus gson.toJson");
         String entityAsJson = gson.toJson(
-                new StashCommitStatus(status, build.getBuildTypeName() + build.getBuildId(), build.getFullName(),
+                new StashCommitStatus(status, build.getBuildTypeExternalId() + commitHash, build.getFullName(),
                         message, targetUrl));
         request.setEntity(new StringEntity(entityAsJson));
         LOGGER.log(Level.INFO, "updateStatus entityAsJson " + entityAsJson);
