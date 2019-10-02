@@ -24,13 +24,13 @@ import com.arcbees.vcs.model.PullRequestTarget;
 public class StashPullRequestTarget implements PullRequestTarget<StashCommit, StashBranch> {
     private StashCommit commit;
     private StashBranch branch;
-    private String latestChangeset;
+    private String latestCommit;
     private String displayId;
 
     @Override
     public Commit getCommit() {
         if (commit == null) {
-            setCommit(new StashCommit(latestChangeset));
+            setCommit(new StashCommit(latestCommit));
         }
         return commit;
     }

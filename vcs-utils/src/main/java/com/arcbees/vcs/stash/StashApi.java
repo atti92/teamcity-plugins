@@ -19,12 +19,17 @@ package com.arcbees.vcs.stash;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -48,6 +53,8 @@ import com.google.gson.GsonBuilder;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 
 public class StashApi extends AbstractVcsApi {
+    private static final Logger LOGGER = Logger.getLogger(StashApi.class.getName());
+
     private final HttpClientWrapper httpClient;
     private final Gson gson;
     private final StashApiPaths apiPaths;
@@ -128,31 +135,69 @@ public class StashApi extends AbstractVcsApi {
     public void updateStatus(String commitHash, String message, CommitStatus status, String targetUrl,
                              SRunningBuild build)
             throws IOException, UnsupportedOperationException {
+        LOGGER.log(Level.INFO, "kisnyul");
+
         String requestUrl = apiPaths.updateStatus(commitHash);
 
         HttpPost request = new HttpPost(requestUrl);
         request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
-
+        LOGGER.log(Level.INFO, "updateStatus gson.toJson");
         String entityAsJson = gson.toJson(
                 new StashCommitStatus(status, build.getBuildTypeName() + build.getBuildId(), build.getFullName(),
                         message, targetUrl));
         request.setEntity(new StringEntity(entityAsJson));
+        LOGGER.log(Level.INFO, "updateStatus entityAsJson " + entityAsJson);
 
         executeRequest(httpClient, request, credentials);
+        LOGGER.log(Level.INFO, "nagynyul");
     }
 
     @Override
     public void approvePullRequest(Integer pullRequestId) throws IOException, UnsupportedOperationException {
-        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId);
+        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId, this.credentials.getUserName());
 
-        HttpPost request = new HttpPost(requestUrl);
+        HttpPut request = new HttpPut(requestUrl);
+        request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
+        Map<String, Object> pckg = new HashMap<>();
+        pckg.put("approved", true);
+        pckg.put("status", "APPROVED");
+        Map<String, Object> usr = new HashMap<>();
+        usr.put("name", credentials.getUserName());
+        pckg.put("user", usr);
+        String entityAsJson = gson.toJson(pckg);
+        request.setEntity(new StringEntity(entityAsJson));
+        System.out.println("--Approve url: " + requestUrl);
+        System.out.println("--Approve json: " + entityAsJson);
+//        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
+        executeRequest(httpClient, request, credentials);
+    }
 
+    public void approvePullRequest(Integer pullRequestId, Map<String, String> toLog) throws IOException, UnsupportedOperationException {
+        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId, this.credentials.getUserName());
+
+        HttpPut request = new HttpPut(requestUrl);
+        request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
+        Map<String, Object> pckg = new HashMap<>();
+        pckg.put("approved", true);
+        pckg.put("status", "APPROVED");
+        Map<String, Object> usr = new HashMap<>();
+        usr.put("name", credentials.getUserName());
+        pckg.put("user", usr);
+        String entityAsJson = gson.toJson(pckg);
+        request.setEntity(new StringEntity(entityAsJson));
+
+        toLog.put("url", requestUrl);
+        toLog.put("json", entityAsJson);
+//        System.out.println("--Approve url: " + requestUrl);
+//        System.out.println("--Approve json: " + entityAsJson);
+//        logger.log(loglevel,  "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
+//        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
         executeRequest(httpClient, request, credentials);
     }
 
     @Override
     public void deletePullRequestApproval(Integer pullRequestId) throws IOException, UnsupportedOperationException {
-        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId);
+        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId, this.credentials.getUserName());
 
         HttpDelete request = new HttpDelete(requestUrl);
 

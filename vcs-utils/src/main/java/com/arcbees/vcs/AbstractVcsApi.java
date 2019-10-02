@@ -19,6 +19,8 @@ package com.arcbees.vcs;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.codec.CharEncoding;
 import org.apache.http.HttpEntity;
@@ -115,12 +117,19 @@ public abstract class AbstractVcsApi implements VcsApi {
 
     private HttpResponse doExecuteRequest(HttpClientWrapper httpClient, HttpUriRequest request, Credentials credentials)
             throws IOException {
+        Logger lgr = Logger.getLogger(AbstractVcsApi.class.getName());
+
+        lgr.log(Level.INFO, "doExecuteRequest");
         includeAuthentication(request, credentials);
+        lgr.log(Level.INFO, "includeAuthentication");
         setDefaultHeaders(request);
+        lgr.log(Level.INFO, "setDefaultHeaders");
 
         HttpResponse httpResponse = httpClient.execute(request);
+
         int statusCode = httpResponse.getStatusLine().getStatusCode();
-        if (statusCode != HttpURLConnection.HTTP_OK && statusCode != HttpURLConnection.HTTP_CREATED) {
+        lgr.log(Level.INFO, "doExecuteRequest status: " + statusCode);
+        if (statusCode != HttpURLConnection.HTTP_OK && statusCode != HttpURLConnection.HTTP_CREATED && statusCode != HttpURLConnection.HTTP_NO_CONTENT) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             httpResponse.getEntity().writeTo(outputStream);
             String json = outputStream.toString(CharEncoding.UTF_8);

@@ -71,8 +71,8 @@ public class StashApiPaths {
         return baseUrl + BUILD_STATUS_COMMITS + commitHash;
     }
 
-    public String approvePullRequest(String repositoryOwner, String repositoryName, Integer pullRequestId) {
-        return baseUrl + API_1 + pathToPullRequest(repositoryOwner, repositoryName, pullRequestId) + APPROVE;
+    public String approvePullRequest(String repositoryOwner, String repositoryName, Integer pullRequestId, String userSlug) {
+        return baseUrl + API_1 + pathToPullRequest(repositoryOwner, repositoryName, pullRequestId) + "/participants/" + userSlug;
     }
 
     private String getPullRequests(String repositoryOwner, String repositoryName) {
