@@ -166,9 +166,26 @@ public class StashApi extends AbstractVcsApi {
         pckg.put("user", usr);
         String entityAsJson = gson.toJson(pckg);
         request.setEntity(new StringEntity(entityAsJson));
-        System.out.println("--Approve url: " + requestUrl);
-        System.out.println("--Approve json: " + entityAsJson);
+//        System.out.println("--Approve url: " + requestUrl);
+//        System.out.println("--Approve json: " + entityAsJson);
 //        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
+        executeRequest(httpClient, request, credentials);
+    }
+
+    @Override
+    public void approvePullRequest(Integer pullRequestId, String approvalStatus) throws IOException, UnsupportedOperationException {
+        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId, this.credentials.getUserName().toLowerCase());
+
+        HttpPut request = new HttpPut(requestUrl);
+        request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
+        Map<String, Object> pckg = new HashMap<>();
+        pckg.put("approved", approvalStatus.equals("APPROVED"));
+        pckg.put("status", approvalStatus);
+        Map<String, Object> usr = new HashMap<>();
+        usr.put("name", credentials.getUserName().toLowerCase());
+        pckg.put("user", usr);
+        String entityAsJson = gson.toJson(pckg);
+        request.setEntity(new StringEntity(entityAsJson));
         executeRequest(httpClient, request, credentials);
     }
 

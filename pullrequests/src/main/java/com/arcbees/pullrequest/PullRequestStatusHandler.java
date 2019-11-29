@@ -55,6 +55,11 @@ public class PullRequestStatusHandler {
     private final Constants constants;
     private final WebLinks webLinks;
 
+    private final String APRST_NEEDS_WORK   = "NEEDS_WORK";
+    private final String APRST_APPROVED     = "APPROVED";
+    private final String APRST_UNAPPROVED   = "UNAPPROVED";
+
+
     public PullRequestStatusHandler(VcsApiFactories vcsApiFactories,
                                     VcsConstants vcsConstants,
                                     Constants constants,
@@ -67,38 +72,28 @@ public class PullRequestStatusHandler {
 
     public void handle(SRunningBuild build, BuildTriggerDescriptor trigger, BuildStatus buildStatus)
             throws IOException {
-        LOGGER.log(Level.INFO, "Handling build \\o/ status - Build Status: {0}, Branch: {1}, isSuccessful: {2}",
-                new Object[]{buildStatus, build.getBranch().getName(), build.getBuildStatus().isSuccessful()});
+//        LOGGER.log(Level.INFO, "Handling build \\o/ status - Build Status: {0}, Branch: {1}, isSuccessful: {2}",
+//                new Object[]{buildStatus, build.getBranch().getName(), build.getBuildStatus().isSuccessful()});
 
         Branch branch = build.getBranch();
-        LOGGER.log(Level.INFO, "A-");
-        if (branch != null) {
-            LOGGER.log(Level.INFO, "A1");
-            SBuildType buildType = build.getBuildType();
 
-            LOGGER.log(Level.INFO, "A2");
+        if (branch != null) {
+
+            SBuildType buildType = build.getBuildType();
             PullRequestPropertiesHelper pullRequestPropertiesHelper =
                     new PullRequestPropertiesHelper(trigger.getProperties(), vcsConstants, constants);
-            LOGGER.log(Level.INFO, "A3");
             VcsApi vcsApi = vcsApiFactories.create(pullRequestPropertiesHelper);
-            LOGGER.log(Level.INFO, "A4");
 
             PullRequest pullRequest = vcsApi.getPullRequestForBranch(branch.getName());
-
-            LOGGER.log(Level.INFO, "A5");
             JsonCustomDataStorage<PullRequestBuild> dataStorage = getJsonDataStorage(buildType, trigger);
-            LOGGER.log(Level.INFO, "A6");
             PullRequestBuild pullRequestBuild =
                     getPullRequestBuild(pullRequestPropertiesHelper, pullRequest, dataStorage);
-            LOGGER.log(Level.INFO, "A7");
 
             CommitStatus commitStatus = getCommitStatus(build.getBuildStatus(), buildStatus);
-            LOGGER.log(Level.INFO, "A8");
             Comment comment = updateStatus(build, vcsApi, pullRequest, pullRequestBuild, commitStatus);
-            LOGGER.log(Level.INFO, "B");
 
             Boolean succesKey = pullRequestPropertiesHelper.getApproveOnSuccessKey();
-            LOGGER.log(Level.INFO, "pullRequestPropertiesHelper.getApproveOnSuccessKey() {0}", succesKey);
+//            LOGGER.log(Level.INFO, "pullRequestPropertiesHelper.getApproveOnSuccessKey() {0}", succesKey);
             if (succesKey) {
 
 
@@ -127,17 +122,17 @@ public class PullRequestStatusHandler {
 
     private void updateApproval(VcsApi vcsApi, PullRequest pullRequest, CommitStatus commitStatus) throws IOException {
         try {
-            LOGGER.log(Level.INFO, "PULL_REQUEST updateApproval() CommitStatus.SUCCESS.equals(commitStatus) : {0}", CommitStatus.SUCCESS.equals(commitStatus));
+//            LOGGER.log(Level.INFO, "PULL_REQUEST updateApproval() CommitStatus.SUCCESS.equals(commitStatus) : {0}", CommitStatus.SUCCESS.equals(commitStatus));
             Map<String, String> logr = new HashMap<>();
-            if (CommitStatus.SUCCESS.equals(commitStatus)) {
-                ((StashApi)vcsApi).approvePullRequest(pullRequest.getId(), logr);
-                LOGGER.log(Level.INFO, "PULL-REQUEST URL {0}", logr.get("url"));
-                LOGGER.log(Level.INFO, "PULL-REQUEST JSON {0}", logr.get("json"));
-//                vcsApi.approvePullRequest(pullRequest.getId());
-            } else {
-                vcsApi.deletePullRequestApproval(pullRequest.getId());
-            }
+            String approvalStatus = APRST_UNAPPROVED;
+            if (CommitStatus.SUCCESS.equals(commitStatus))
+                approvalStatus = APRST_APPROVED;
+            else if (CommitStatus.PENDING.equals(commitStatus))
+                approvalStatus = APRST_NEEDS_WORK;
+            vcsApi.approvePullRequest(pullRequest.getId(), approvalStatus);
         } catch (UnsupportedOperationException e) {
+            LOGGER.log(Level.SEVERE, "PULL-REQUEST id {0}\nException {1}",
+                    new Object[]{pullRequest.getId(), e});
         }
     }
 
@@ -147,9 +142,9 @@ public class PullRequestStatusHandler {
                                  PullRequestBuild pullRequestBuild,
                                  CommitStatus commitStatus) throws IOException {
         try {
-            LOGGER.log(Level.INFO, "PULL-REQUEST updateStatus");
+//            LOGGER.log(Level.INFO, "PULL-REQUEST updateStatus");
             String statusMessage = getStatusMessage(build, commitStatus);
-            LOGGER.log(Level.INFO, "PULL-REQUEST statusMessage {0}", statusMessage);
+//            LOGGER.log(Level.INFO, "PULL-REQUEST statusMessage {0}", statusMessage);
             vcsApi.updateStatus(getSourceCommitHash(pullRequest), statusMessage, commitStatus, getTargetUrl(build),
                     build);
 

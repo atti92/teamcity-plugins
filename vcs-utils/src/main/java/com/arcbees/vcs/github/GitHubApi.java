@@ -145,6 +145,11 @@ public class GitHubApi extends AbstractVcsApi {
     }
 
     @Override
+    public void approvePullRequest(Integer pullRequestId, String approvalStatus) throws IOException, UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void deletePullRequestApproval(Integer pullRequestId) throws IOException, UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }

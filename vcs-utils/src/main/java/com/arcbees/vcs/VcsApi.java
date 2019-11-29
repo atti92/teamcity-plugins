@@ -42,5 +42,7 @@ public interface VcsApi {
 
     void approvePullRequest(Integer pullRequestId) throws IOException, UnsupportedOperationException;
 
+    void approvePullRequest(Integer pullRequestId, String approvalStatus) throws IOException, UnsupportedOperationException;
+
     void deletePullRequestApproval(Integer pullRequestId) throws IOException, UnsupportedOperationException;
 }

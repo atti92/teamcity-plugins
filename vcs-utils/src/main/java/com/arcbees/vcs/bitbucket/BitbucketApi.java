@@ -150,6 +150,15 @@ public class BitbucketApi extends AbstractVcsApi {
     }
 
     @Override
+    public void approvePullRequest(Integer pullRequestId, String approvalStatus) throws IOException, UnsupportedOperationException {
+        String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId);
+
+        HttpPost request = new HttpPost(requestUrl);
+
+        executeRequest(httpClient, request, credentials);
+    }
+
+    @Override
     public void deletePullRequestApproval(Integer pullRequestId) throws IOException, UnsupportedOperationException {
         String requestUrl = apiPaths.approvePullRequest(repositoryOwner, repositoryName, pullRequestId);
 
