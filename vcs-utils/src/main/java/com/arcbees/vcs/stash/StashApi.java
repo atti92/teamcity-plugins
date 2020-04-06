@@ -133,7 +133,7 @@ public class StashApi extends AbstractVcsApi {
         request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
         request.setEntity(new ByteArrayEntity(gson.toJson(new StashComment(comment)).getBytes(Charsets.UTF_8)));
 
-        return processResponse(httpClient, request, credentials, null, gson, StashComment.class);
+        return processResponse(httpClient, request, credentials, authToken, gson, StashComment.class);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class StashApi extends AbstractVcsApi {
         request.setEntity(new StringEntity(entityAsJson));
 //        LOGGER.log(Level.INFO, "updateStatus entityAsJson " + entityAsJson);
 
-        executeRequest(httpClient, request, credentials, null);
+        executeRequest(httpClient, request, credentials, authToken);
 //        LOGGER.log(Level.INFO, "nagynyul");
     }
 
@@ -174,7 +174,7 @@ public class StashApi extends AbstractVcsApi {
 //        System.out.println("--Approve url: " + requestUrl);
 //        System.out.println("--Approve json: " + entityAsJson);
 //        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
-        executeRequest(httpClient, request, credentials, null);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     @Override
@@ -191,7 +191,7 @@ public class StashApi extends AbstractVcsApi {
         pckg.put("user", usr);
         String entityAsJson = gson.toJson(pckg);
         request.setEntity(new StringEntity(entityAsJson));
-        executeRequest(httpClient, request, credentials, null);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     public void approvePullRequest(Integer pullRequestId, Map<String, String> toLog) throws IOException, UnsupportedOperationException {
@@ -214,7 +214,7 @@ public class StashApi extends AbstractVcsApi {
 //        System.out.println("--Approve json: " + entityAsJson);
 //        logger.log(loglevel,  "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
 //        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
-        executeRequest(httpClient, request, credentials, null);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class StashApi extends AbstractVcsApi {
 
         HttpDelete request = new HttpDelete(requestUrl);
 
-        executeRequest(httpClient, request, credentials, null);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     private StashComment getComment(Integer pullRequestId, Long commentId) throws IOException {
@@ -231,11 +231,11 @@ public class StashApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        includeAuthentication(request, credentials, null);
+        includeAuthentication(request, credentials, authToken);
         setDefaultHeaders(request);
 
         try {
-            return processResponse(httpClient, request, credentials, null, gson, StashComment.class);
+            return processResponse(httpClient, request, credentials, authToken, gson, StashComment.class);
         } catch (UnexpectedHttpStatusException e) {
             return null;
         }
