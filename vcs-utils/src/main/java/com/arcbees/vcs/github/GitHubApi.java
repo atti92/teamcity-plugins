@@ -80,7 +80,7 @@ public class GitHubApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        return processResponse(httpClient, request, credentials, gson, GitHubPullRequests.class);
+        return processResponse(httpClient, request, credentials, null, gson, GitHubPullRequests.class);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class GitHubApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        return processResponse(httpClient, request, credentials, gson, GitHubPullRequests.class);
+        return processResponse(httpClient, request, credentials, null, gson, GitHubPullRequests.class);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class GitHubApi extends AbstractVcsApi {
 
         HttpDelete request = new HttpDelete(requestUrl);
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, null);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class GitHubApi extends AbstractVcsApi {
         request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
         request.setEntity(new ByteArrayEntity(gson.toJson(new GitHubCreateComment(comment)).getBytes(Charsets.UTF_8)));
 
-        return processResponse(httpClient, request, credentials, gson, GitHubComment.class);
+        return processResponse(httpClient, request, credentials, null, gson, GitHubComment.class);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class GitHubApi extends AbstractVcsApi {
         String entityAsJson = gson.toJson(new GitHubCommitStatus(status, message, targetUrl));
         request.setEntity(new StringEntity(entityAsJson));
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, null);
     }
 
     @Override

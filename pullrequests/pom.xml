@@ -30,6 +30,16 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.jetbrains.teamcity</groupId>
+                <artifactId>teamcity-sdk-maven-plugin</artifactId>
+                <version>0.4</version>
+                <configuration>
+                    <teamcityDir>C:/Teamcity</teamcityDir>
+                    <serverAddress>localhost:72</serverAddress>
+                    <!-- <teamcityDir>/path/to/tc/distro</teamcityDir> -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

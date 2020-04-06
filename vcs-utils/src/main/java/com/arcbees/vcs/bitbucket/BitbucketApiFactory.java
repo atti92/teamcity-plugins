@@ -42,6 +42,7 @@ public class BitbucketApiFactory implements VcsApiFactory {
         return new BitbucketApi(httpClient, new BitbucketApiPaths(vcsPropertiesHelper.getServerUrl()),
                 vcsPropertiesHelper.getUserName(),
                 vcsPropertiesHelper.getPassword(),
+                vcsPropertiesHelper.getAuthToken(),
                 vcsPropertiesHelper.getRepositoryOwner(),
                 vcsPropertiesHelper.getRepositoryName());
     }

@@ -43,6 +43,7 @@ public class StashApiFactory implements VcsApiFactory {
         return new StashApi(httpClient, new StashApiPaths(vcsPropertiesHelper.getServerUrl()),
                 vcsPropertiesHelper.getUserName(),
                 vcsPropertiesHelper.getPassword(),
+                vcsPropertiesHelper.getAuthToken(),
                 vcsPropertiesHelper.getRepositoryOwner(),
                 vcsPropertiesHelper.getRepositoryName());
     }

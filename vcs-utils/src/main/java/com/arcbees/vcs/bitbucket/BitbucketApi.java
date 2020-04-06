@@ -54,12 +54,15 @@ public class BitbucketApi extends AbstractVcsApi {
     private final BitbucketApiPaths apiPaths;
     private final String repositoryOwner;
     private final String repositoryName;
+    private final String authToken;
     private final UsernamePasswordCredentials credentials;
+    private final UsernamePasswordCredentials tokenCredentials;
 
     public BitbucketApi(HttpClientWrapper httpClient,
             BitbucketApiPaths apiPaths,
             String userName,
             String password,
+            String authToken,
             String repositoryOwner,
             String repositoryName) {
         this.httpClient = httpClient;
@@ -67,6 +70,8 @@ public class BitbucketApi extends AbstractVcsApi {
         this.repositoryOwner = repositoryOwner;
         this.repositoryName = repositoryName;
         this.credentials = new UsernamePasswordCredentials(userName, password);
+        this.tokenCredentials = new UsernamePasswordCredentials("noname", authToken);
+        this.authToken = this.tokenCredentials.getPassword();
         this.gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonDateTypeAdapter()).create();
     }
 
@@ -76,7 +81,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        return processResponse(httpClient, request, credentials, gson, BitbucketPullRequests.class);
+        return processResponse(httpClient, request, credentials, authToken, gson, BitbucketPullRequests.class);
     }
 
     @Override
@@ -85,7 +90,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        return processResponse(httpClient, request, credentials, gson, BitbucketPullRequests.class);
+        return processResponse(httpClient, request, credentials, authToken, gson, BitbucketPullRequests.class);
     }
 
     @Override
@@ -105,7 +110,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         HttpDelete request = new HttpDelete(requestUrl);
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     @Override
@@ -120,7 +125,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         request.setEntity(new UrlEncodedFormEntity(postParameters));
 
-        return processResponse(httpClient, request, credentials, gson, BitbucketComment.class);
+        return processResponse(httpClient, request, credentials, authToken, gson, BitbucketComment.class);
     }
 
     @Override
@@ -137,7 +142,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         request.setEntity(new StringEntity(entityAsJson));
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     @Override
@@ -146,7 +151,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         HttpPost request = new HttpPost(requestUrl);
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     @Override
@@ -155,7 +160,7 @@ public class BitbucketApi extends AbstractVcsApi {
 
         HttpPost request = new HttpPost(requestUrl);
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 
     @Override
@@ -164,6 +169,6 @@ public class BitbucketApi extends AbstractVcsApi {
 
         HttpDelete request = new HttpDelete(requestUrl);
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, authToken);
     }
 }

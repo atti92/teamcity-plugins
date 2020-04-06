@@ -45,6 +45,10 @@ public class VcsPropertiesHelper {
         return properties.get(vcsConstants.getUserNameKey());
     }
 
+    public String getAuthToken() {
+        return properties.get(vcsConstants.getAuthTokenKey());
+    }
+
     public String getVcsType() {
         return properties.get(vcsConstants.getVcsType());
     }

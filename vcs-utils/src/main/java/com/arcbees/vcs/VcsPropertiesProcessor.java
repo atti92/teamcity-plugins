@@ -37,8 +37,12 @@ public class VcsPropertiesProcessor implements PropertiesProcessor {
         Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
         if (properties == null) return result;
 
-        checkNotEmpty(properties, vcsConstants.getUserNameKey(), "Username must be specified", result);
-        checkNotEmpty(properties, vcsConstants.getPasswordKey(), "Password must be specified", result);
+        if ( isEmptyOrSpaces(properties.get(vcsConstants.getAuthTokenKey())) ){
+            checkNotEmpty(properties, vcsConstants.getUserNameKey(), "Username must be specified (if Auth Token not provided)", result);
+            checkNotEmpty(properties, vcsConstants.getPasswordKey(), "Password must be specified (if Auth Token not provided)", result);
+        }
+
+
         checkNotEmpty(properties, vcsConstants.getRepositoryOwnerKey(), "Repository owner must be specified", result);
         checkNotEmpty(properties, vcsConstants.getRepositoryNameKey(), "Repository name must be specified", result);
 

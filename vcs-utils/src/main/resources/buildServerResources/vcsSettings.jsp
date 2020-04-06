@@ -60,6 +60,14 @@
             <span class="smallNote">VCS password</span>
         </td>
     </tr>
+    <tr>
+        <th>Auth Token:<l:star/></th>
+        <td>
+            <props:passwordProperty name="${keys.authTokenKey}" className="longField"/>
+            <span class="error" id="error_${keys.authTokenKey}"></span>
+            <span class="smallNote">VCS authorization token</span>
+        </td>
+    </tr>
 </l:settingsGroup>
 <l:settingsGroup title="Repository">
     <tr>

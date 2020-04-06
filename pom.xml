@@ -18,6 +18,8 @@
 
     <properties>
         <teamcity.version>10.0</teamcity.version>
+        <!-- tc-sdk expects '-' instead of '.' in teamcity-version....  -->
+        <teamcity-version>2018.2.3</teamcity-version>
         <openapi.version>7.0.3</openapi.version>
         <!-- Guava is provided by TeamCity, do not update version -->
         <guava.version>13.0.1</guava.version>
@@ -47,6 +49,13 @@
             <url>http://repository.jetbrains.com/all</url>
         </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>JetBrains</id>
+            <url>https://download.jetbrains.com/teamcity-repository</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -115,6 +124,7 @@
     </dependencyManagement>
 
     <build>
+
         <resources>
             <resource>
                 <directory>src/main/resources/META-INF</directory>
@@ -178,6 +188,16 @@
                     <configuration>
                         <source>${target.jdk}</source>
                         <target>${target.jdk}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jetbrains.teamcity</groupId>
+                    <artifactId>teamcity-sdk-maven-plugin</artifactId>
+                    <version>0.4</version>
+                    <configuration>
+                        <teamcityDir>C:/Teamcity</teamcityDir>
+                        <!-- <teamcityDir>/path/to/tc/distro</teamcityDir> -->
                     </configuration>
                 </plugin>
             </plugins>

@@ -60,12 +60,15 @@ public class StashApi extends AbstractVcsApi {
     private final StashApiPaths apiPaths;
     private final String repositoryOwner;
     private final String repositoryName;
+    private final String authToken;
     private final UsernamePasswordCredentials credentials;
+    private final UsernamePasswordCredentials tokenCredentials;
 
     public StashApi(HttpClientWrapper httpClient,
                     StashApiPaths apiPaths,
                     String userName,
                     String password,
+                    String authToken,
                     String repositoryOwner,
                     String repositoryName) {
         this.httpClient = httpClient;
@@ -73,6 +76,8 @@ public class StashApi extends AbstractVcsApi {
         this.repositoryOwner = repositoryOwner;
         this.repositoryName = repositoryName;
         this.credentials = new UsernamePasswordCredentials(userName, password);
+        this.tokenCredentials = new UsernamePasswordCredentials("noname", authToken);
+        this.authToken = this.tokenCredentials.getPassword();
         this.gson = new GsonBuilder().registerTypeAdapter(Date.class, new GsonDateTypeAdapter()).create();
     }
 
@@ -82,7 +87,7 @@ public class StashApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        return processResponse(httpClient, request, credentials, gson, StashPullRequests.class);
+        return processResponse(httpClient, request, credentials, authToken, gson, StashPullRequests.class);
     }
 
     @Override
@@ -91,7 +96,7 @@ public class StashApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        return processResponse(httpClient, request, credentials, gson, StashPullRequests.class);
+        return processResponse(httpClient, request, credentials, authToken, gson, StashPullRequests.class);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class StashApi extends AbstractVcsApi {
 
             HttpDelete request = new HttpDelete(requestUrl);
 
-            executeRequest(httpClient, request, credentials);
+            executeRequest(httpClient, request, credentials, authToken);
         }
     }
 
@@ -128,28 +133,28 @@ public class StashApi extends AbstractVcsApi {
         request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
         request.setEntity(new ByteArrayEntity(gson.toJson(new StashComment(comment)).getBytes(Charsets.UTF_8)));
 
-        return processResponse(httpClient, request, credentials, gson, StashComment.class);
+        return processResponse(httpClient, request, credentials, null, gson, StashComment.class);
     }
 
     @Override
     public void updateStatus(String commitHash, String message, CommitStatus status, String targetUrl,
                              SRunningBuild build)
             throws IOException, UnsupportedOperationException {
-        LOGGER.log(Level.INFO, "kisnyul");
+//        LOGGER.log(Level.INFO, "kisnyul");
 
         String requestUrl = apiPaths.updateStatus(commitHash);
 
         HttpPost request = new HttpPost(requestUrl);
         request.setHeader(new BasicHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType()));
-        LOGGER.log(Level.INFO, "updateStatus gson.toJson");
+//        LOGGER.log(Level.INFO, "updateStatus gson.toJson");
         String entityAsJson = gson.toJson(
                 new StashCommitStatus(status, build.getBuildTypeExternalId() + commitHash, build.getFullName(),
                         message, targetUrl));
         request.setEntity(new StringEntity(entityAsJson));
-        LOGGER.log(Level.INFO, "updateStatus entityAsJson " + entityAsJson);
+//        LOGGER.log(Level.INFO, "updateStatus entityAsJson " + entityAsJson);
 
-        executeRequest(httpClient, request, credentials);
-        LOGGER.log(Level.INFO, "nagynyul");
+        executeRequest(httpClient, request, credentials, null);
+//        LOGGER.log(Level.INFO, "nagynyul");
     }
 
     @Override
@@ -169,7 +174,7 @@ public class StashApi extends AbstractVcsApi {
 //        System.out.println("--Approve url: " + requestUrl);
 //        System.out.println("--Approve json: " + entityAsJson);
 //        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, null);
     }
 
     @Override
@@ -186,7 +191,7 @@ public class StashApi extends AbstractVcsApi {
         pckg.put("user", usr);
         String entityAsJson = gson.toJson(pckg);
         request.setEntity(new StringEntity(entityAsJson));
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, null);
     }
 
     public void approvePullRequest(Integer pullRequestId, Map<String, String> toLog) throws IOException, UnsupportedOperationException {
@@ -209,7 +214,7 @@ public class StashApi extends AbstractVcsApi {
 //        System.out.println("--Approve json: " + entityAsJson);
 //        logger.log(loglevel,  "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
 //        LOGGER.log(Level.INFO, "url: {0} \n\tjson to approve: '{1}'", requestUrl, entityAsJson);
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, null);
     }
 
     @Override
@@ -218,7 +223,7 @@ public class StashApi extends AbstractVcsApi {
 
         HttpDelete request = new HttpDelete(requestUrl);
 
-        executeRequest(httpClient, request, credentials);
+        executeRequest(httpClient, request, credentials, null);
     }
 
     private StashComment getComment(Integer pullRequestId, Long commentId) throws IOException {
@@ -226,11 +231,11 @@ public class StashApi extends AbstractVcsApi {
 
         HttpGet request = new HttpGet(requestUrl);
 
-        includeAuthentication(request, credentials);
+        includeAuthentication(request, credentials, null);
         setDefaultHeaders(request);
 
         try {
-            return processResponse(httpClient, request, credentials, gson, StashComment.class);
+            return processResponse(httpClient, request, credentials, null, gson, StashComment.class);
         } catch (UnexpectedHttpStatusException e) {
             return null;
         }

@@ -48,9 +48,10 @@ import com.google.gson.Gson;
 public abstract class AbstractVcsApi implements VcsApi {
     protected HttpResponse executeRequest(HttpClientWrapper httpClient,
                                           HttpUriRequest request,
-                                          Credentials credentials) throws IOException {
+                                          Credentials credentials,
+                                          String authToken) throws IOException {
         try {
-            return doExecuteRequest(httpClient, request, credentials);
+            return doExecuteRequest(httpClient, request, credentials, authToken);
         } finally {
             request.abort();
         }
@@ -59,10 +60,11 @@ public abstract class AbstractVcsApi implements VcsApi {
     protected <T> T processResponse(HttpClientWrapper httpClient,
                                     HttpUriRequest request,
                                     Credentials credentials,
+                                    String authToken,
                                     Gson gson,
                                     Class<T> clazz) throws IOException {
         try {
-            HttpResponse httpResponse = doExecuteRequest(httpClient, request, credentials);
+            HttpResponse httpResponse = doExecuteRequest(httpClient, request, credentials, authToken);
 
             HttpEntity entity = httpResponse.getEntity();
             if (entity == null) {
@@ -89,9 +91,17 @@ public abstract class AbstractVcsApi implements VcsApi {
     }
 
     protected void includeAuthentication(HttpRequest request,
-                                         Credentials credentials) throws IOException {
+                                         Credentials credentials,
+                                         String authToken) throws IOException {
         try {
-            request.addHeader(new BasicScheme().authenticate(credentials, request, null));
+            if (authToken != null){
+                if (authToken.startsWith("credentialsJSON:")){
+                    authToken = authToken.substring(16);
+                }
+                request.addHeader("Authorization", "Bearer " + authToken);
+            } else {
+                request.addHeader(new BasicScheme().authenticate(credentials, request, null));
+            }
         } catch (AuthenticationException e) {
             throw new IOException("Failed to set authentication for request. " + e.getMessage(), e);
         }
@@ -115,15 +125,15 @@ public abstract class AbstractVcsApi implements VcsApi {
         }).orNull();
     }
 
-    private HttpResponse doExecuteRequest(HttpClientWrapper httpClient, HttpUriRequest request, Credentials credentials)
+    private HttpResponse doExecuteRequest(HttpClientWrapper httpClient, HttpUriRequest request, Credentials credentials, String authToken)
             throws IOException {
         Logger lgr = Logger.getLogger(AbstractVcsApi.class.getName());
 
-        lgr.log(Level.INFO, "doExecuteRequest");
-        includeAuthentication(request, credentials);
-        lgr.log(Level.INFO, "includeAuthentication");
+//        lgr.log(Level.INFO, "doExecuteRequest");
+        includeAuthentication(request, credentials, authToken);
+//        lgr.log(Level.INFO, "includeAuthentication");
         setDefaultHeaders(request);
-        lgr.log(Level.INFO, "setDefaultHeaders");
+//        lgr.log(Level.INFO, "setDefaultHeaders");
 
         HttpResponse httpResponse = httpClient.execute(request);
 
@@ -134,7 +144,7 @@ public abstract class AbstractVcsApi implements VcsApi {
             httpResponse.getEntity().writeTo(outputStream);
             String json = outputStream.toString(CharEncoding.UTF_8);
             throw new UnexpectedHttpStatusException(statusCode,
-                    "Failed to complete request. Status: " + httpResponse.getStatusLine() + '\n' + json);
+                    "Failed to complete request. Status: " + httpResponse.getStatusLine() + "\n (auth-token: "+ authToken+")\n" + json);
         }
 
         return httpResponse;

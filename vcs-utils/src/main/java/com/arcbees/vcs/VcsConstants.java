@@ -21,6 +21,7 @@ import static jetbrains.buildServer.agent.Constants.SECURE_PROPERTY_PREFIX;
 public class VcsConstants {
     private static final String USERNAME_KEY = "vcs_username";
     private static final String PASSWORD_KEY = SECURE_PROPERTY_PREFIX + "vcs_password";
+    private static final String AUTH_TOKEN_KEY = SECURE_PROPERTY_PREFIX + "vcs_auth_token";
     private static final String SERVER_URL = "vcs_server";
     private static final String REPOSITORY_KEY = "vcs_repo";
     private static final String REPOSITORY_OWNER = "vcs_owner";
@@ -34,6 +35,10 @@ public class VcsConstants {
 
     public String getPasswordKey() {
         return PASSWORD_KEY;
+    }
+
+    public String getAuthTokenKey() {
+        return AUTH_TOKEN_KEY;
     }
 
     public String getRepositoryNameKey() {
